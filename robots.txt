@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://antoniocollesei.github.io/al-folio/sitemap.xml
+Sitemap: https://antoniocollesei.github.io/sitemap.xml
