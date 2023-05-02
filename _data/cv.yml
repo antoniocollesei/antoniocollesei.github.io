@@ -17,20 +17,17 @@
       description:
         - Program in Clinical and Experimental Oncology at Istituto Oncologico Veneto, IRCCS
         - Part of Vandin Lab at Department of Information Engineering
-
     - title: 2nd Level Master's Degree in Machine Learning and Big Data in Biomedical Research
       institution: University of Padua, Padua, Italy
       year: 2019 - 2020
       description:
         - Thesis on "ML Model to predict Pharmacological Response from DNA Alterations"
-
     - title: Master's Degree in Bioengineering
       institution: University of Padua, Padua, Italy
       year: 2015 - 2017
       description:
         - Thesis on "Quantifying immune contexture of tumors using imaging and sequencing data"
         - Curriculum in biological data analysis and elaboration
-
     - title: Master's Degree in Bioengineering
       institution: University of Padua, Padua, Italy
       year: 2012 - 2015
@@ -44,11 +41,9 @@
     - title: Doctoral Researcher
       institution: Istituto Oncologico Veneto IRCCS, Padua, Italy
       year: 2020 - now
-
     - title: Biomedical Engineer
       institution: Inventis s.r.l., Padua, Italy
       year: 2018 - 2020
-      
     - title: Research Assistant
       institution: Medizinische Universität, Innsbruck, Austria
       year: 2017
