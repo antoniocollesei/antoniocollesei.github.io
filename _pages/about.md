@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Ph.D. Researcher at <a href='https://www.ioveneto.it/en/'>Istituto Oncologico Veneto IRCCS</a>. Bioinformatics, and some more.
+subtitle: Ph.D. Researcher at <a href='https://www.ioveneto.it/en/'>Istituto Oncologico Veneto IRCCS</a>.
 
 profile:
   align: right
