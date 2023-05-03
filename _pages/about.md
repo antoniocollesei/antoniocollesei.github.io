@@ -28,4 +28,4 @@ They received their Master's Degree in Bioengineering from the University of Pad
 Enough with the third-person, I am lucky if you read until here, but that was the official bit.
 As my Ph.D. period is going to be concluded by the end of the year, I am exploring visiting opportunities for the next few months.
 
-Outside of academia, I enjoy playing team sports in official tournaments (kind of competitive guy) or even pick-up games in the park. I also produce and star in short movies, occasionally winning prizes. Check out [Hidden Embers on YouTube](`https://www.youtube.com/user/hiddenembers`). Most of it is in italian, but we are *"**working hard"* to make subtitles available.
+Outside of academia, I enjoy playing team sports in official tournaments (kind of competitive guy) or even pick-up games in the park. I also produce and star in short movies, occasionally winning prizes. Check out [Hidden Embers on YouTube](`https://www.youtube.com/user/hiddenembers`). Most of it is in italian, but we are *working hard* to make subtitles available.
