@@ -90,4 +90,4 @@
   type: list
   contents:
     - <u>Hobbies:</u> Photo-editing, Trivia-addicted, Movie-making, and Movie-rating.
-    - <u>Sports:</u> Soccer, Basketball, Tennis, and Beach-Volley.
+    #- <u>Sports:</u> Soccer, Basketball, Tennis, and Beach-Volley.
