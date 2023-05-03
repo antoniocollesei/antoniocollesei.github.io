@@ -78,7 +78,7 @@
         - Pseudo-temporal models are cool, but they are still a bit raw in terms of mathematical explainability.
     - title: Causality
       items:
-        - "Correlation is not Causation" is my new mantra. 
+        - <u>Correlation is not Causation:</u> my new mantra. 
         - I have recently developed ALLSTAR, a causally reliable tool for omics data.
         - I read "The Book of Why" by Judea Pearl.
     - title: Pharmacogenomics
@@ -90,4 +90,4 @@
   type: list
   contents:
     - <u>Hobbies:</u> Photo-editing, Trivia-addicted, Movie-making, and Movie-rating.
-    #- <u>Sports:</u> Soccer, Basketball, Tennis, and Beach-Volley.
+    - <u>Sports:</u> Soccer, Basketball, Tennis, and Beach-Volley.
