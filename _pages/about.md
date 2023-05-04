@@ -7,7 +7,7 @@ subtitle: Ph.D. Researcher at <a href='https://www.ioveneto.it/en/'>Istituto Onc
 profile:
   align: right
   image: prof_pic.jpg
-  image_circular: false # crops the image to make it circular
+  image_circular: true # crops the image to make it circular
   address: >
     <p>7th Floor North, Institute of Pediatric Research</p>
     <p>Corso Stati Uniti, 4</p>
