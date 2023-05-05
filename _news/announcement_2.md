@@ -17,8 +17,5 @@ We had the pleasure to have her at our lab in the last months, and she definitel
     </div>
 </div>
 <div class="caption">
-    We had quite some celebration time at the Park. Here above the pic with the co-advisors.
+    We had quite some celebration time at Parco Fistomba. Here above the pic with the co-advisors.
 </div>
-
-
-We had quite some celebration time at the Park. Here above the pic with the co-advisors.
