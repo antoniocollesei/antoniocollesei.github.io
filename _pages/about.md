@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Ph.D. Researcher at <a href='https://www.ioveneto.it/en/'>Istituto Oncologico Veneto IRCCS</a>.
+subtitle: Ph.D. Researcher in Computational Biology @ <a href='https://www.ioveneto.it/en/'>Istituto Oncologico Veneto IRCCS</a>.
 
 profile:
   align: right
@@ -20,7 +20,7 @@ social: true  # includes social icons at the bottom of the page
 I'm a doctoral researcher in Computational Biology at the Veneto Instute of Oncology, Padua, Italy, and currently part of [Vandin Lab](`https://www.dei.unipd.it/~vandinfa/PI.html`) and [AIDA Lab](`https://aidalabdei.github.io/`) at the Department of Information Engineering of the University of Padova, Italy.
 My research mainly focuses on developing causal methods for omics data to unveil the underlying biology in cancer patients. I have also been working on machine learning models in observational and clinical studies.
 
-I received my Master's Degree in Bioengineering from the University of Padova in 2017, including a one-year visiting research period at the Medizinische Universität, Innsbruck, Austria. Between Master's and Ph.D. I temporarily switched to industry, working for an italian multinational company ([Inventis](http://www.inventis.it/world)).
+I received my Master's Degree in Bioengineering from the University of Padova in 2017, including a one-year visiting research period at the Medizinische Universität, Innsbruck, Austria, under the supervision of Zlatko Trajanoski and [Francesca Finotello](https://computationalbiomedicinegroup.github.io/). Between my Master's and Ph.D. I temporarily switched to industry, working for an italian multinational company ([Inventis](http://www.inventis.it/world)).
 
 > *"I can say exactly what I feel about any issue, and I'm going to do that."*
 > Kary Mullis
