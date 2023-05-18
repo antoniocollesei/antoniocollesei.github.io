@@ -1,7 +1,7 @@
 github_users:
   - antoniocollesei
   - VandinLab
-  - aidaLabDEI
+  #- aidaLabDEI
 
 github_repos:
   - VandinLab/ALLSTAR
