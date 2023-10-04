@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Ph.D. Researcher in Computational Biology @ <a href='https://www.ioveneto.it/en/'>Istituto Oncologico Veneto IRCCS</a>.
+subtitle: Ph.D. Student in Computational Biology @ <a href='https://www.unipd.it/en/'>University of Padova</a>.
 
 profile:
   align: right
@@ -17,15 +17,11 @@ news: true  # includes a list of news items
 selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 ---
-I'm a doctoral researcher in Computational Biology at the Veneto Instute of Oncology, Padua, Italy, and currently part of [Vandin Lab](`https://www.dei.unipd.it/~vandinfa/PI.html`) and [AIDA Lab](`https://aidalabdei.github.io/`) at the Department of Information Engineering of the University of Padova, Italy.
-My research mainly focuses on developing causal methods for omics data to unveil the underlying biology in cancer patients. I have also been working on machine learning models in observational and clinical studies.
+I'm a doctoral researcher in Computational Biology at the Veneto Instute of Oncology, Padua, Italy, and currently part of [Vandin Lab](https://www.dei.unipd.it/~vandinfa/people.html) and [AIDA Lab](https://aidalabdei.github.io/) at the Department of Information Engineering of the University of Padova, Italy.
+My research mainly focuses on developing methods for omics data to unveil the underlying biology in cancer patients. I have also been working on machine learning models in observational and clinical studies.
 
 I received my Master's Degree in Bioengineering from the University of Padova in 2017, including a one-year visiting research period at the Medizinische Universität, Innsbruck, Austria, under the supervision of Zlatko Trajanoski and [Francesca Finotello](https://computationalbiomedicinegroup.github.io/). Between my Master's and Ph.D. I temporarily switched to industry, working for an italian multinational company ([Inventis](http://www.inventis.it/world)).
 
-> *"I can say exactly what I feel about any issue, and I'm going to do that."*
-> Kary Mullis
-
-I am lucky if you read until here, but that was the official bit.
-As my Ph.D. period is going to be concluded by the end of the year, I am exploring visiting opportunities for the next few months. So, if you see some matching patterns about field of expertise and/or interests, I would be happy to discuss potential collaborations!
+As my Ph.D. period is going to end in 2023, I have been granted a Research scholarship by [Veneto Institute of Oncology](www.ioveneto.it/en) to build and develop a Bioinformatics Group. I would be happy to discuss potential collaborations, as well as visiting periods!
 
 Outside of academia, I enjoy playing team sports in official tournaments (kind of competitive guy) or even pick-up games in the park. I also produce and star in short movies, occasionally winning prizes. Check out [Hidden Embers on YouTube](`https://www.youtube.com/user/hiddenembers`). Most of it is in italian, but we are *working hard* to make subtitles available.
