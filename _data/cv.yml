@@ -39,17 +39,17 @@
   type: time_table
   contents:
     - title: Doctoral Researcher
-      institution: Istituto Oncologico Veneto IRCCS, Padua, Italy
-      year: 2020 - now
+      institution: Veneto Institute of Oncology IOV - IRCCS, Padua, Italy
+      year: 2023 - now
+    - title: Doctoral Researcher
+      institution: Veneto Institute of Oncology IOV - IRCCS, Padua, Italy
+      year: 2020 - 2023
     - title: Biomedical Engineer
       institution: Inventis s.r.l., Padua, Italy
       year: 2018 - 2020
     - title: Research Assistant
       institution: Medizinische Universität, Innsbruck, Austria
       year: 2017
-      description:
-        - Development of omics data pipelines
-        - Supervisor(s) Prof. Zlatko Trajanoski, and Francesca Finotello
 
 
 - title: Academic Interests
