@@ -8,7 +8,7 @@ category: work
 ---
 # Data Upload and Inspection
 
-```r class.source="bg-danger", class.output="bg-warning"
+```r
 load("project_dataset.RData")
 head(CCLE_MUT_CNA_AMP_DEL_binary_Revealer[,1:4])
 ```
