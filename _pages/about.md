@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Health Researcher in Computational Biology @ <a href='www.ioveneto.it/en'>IOV-IRCCS</a> & Ph.D. Student @ <a href='https://www.unipd.it/en/'>University of Padova</a>.
+subtitle: Researcher in Bioinformatics and Computational Oncology @ <a href='www.ioveneto.it/en'>IOV-IRCCS</a>.
 
 profile:
   align: right
@@ -17,11 +17,9 @@ news: true  # includes a list of news items
 selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 ---
-I'm a doctoral researcher in Computational Biology at the Veneto Instute of Oncology, Padua, Italy, and currently part of [Vandin Lab](https://www.dei.unipd.it/~vandinfa/people.html) and [AIDA Lab](https://aidalabdei.github.io/) at the Department of Information Engineering of the University of Padova, Italy.
-My research mainly focuses on developing methods for omics data to unveil the underlying biology in cancer patients. I have also been working on machine learning models in observational and clinical studies.
+I'm a researcher in Bioinformatics and Computational Oncology at the Veneto Instute of Oncology, Italy, and former Ph.D student (2020-2023) at the University of Padova. I have been part of [Vandin Lab](https://www.dei.unipd.it/~vandinfa/people.html) and [AIDA Lab](https://aidalabdei.github.io/) (Department of Information Engineering, University of Padova, Italy).
+My research mainly focuses on developing methods for omics data to unveil the underlying biology in cancer cohorts. I have also been working on machine learning models in observational and clinical studies.
 
 I received my Master's Degree in Bioengineering from the University of Padova in 2017, including a one-year visiting research period at the Medizinische Universität, Innsbruck, Austria, under the supervision of Zlatko Trajanoski and [Francesca Finotello](https://computationalbiomedicinegroup.github.io/). Between my Master's and Ph.D. I temporarily switched to industry, working for an italian multinational company ([Inventis](http://www.inventis.it/world)).
-
-As my Ph.D. period is going to end in 2023, I have been granted a Research contract by [Veneto Institute of Oncology](www.ioveneto.it/en) to build and develop a Bioinformatics Group. I would be happy to discuss potential collaborations, as well as visiting periods!
 
 Outside of academia, I enjoy playing team sports in official tournaments (kind of competitive guy) or even pick-up games in the park. I also produce and star in short movies, occasionally winning prizes. Check out [Hidden Embers on YouTube](`https://www.youtube.com/user/hiddenembers`). Most of it is in italian, but we are *working hard* to make subtitles available.
