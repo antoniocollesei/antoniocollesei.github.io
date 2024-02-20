@@ -1,9 +1,729 @@
 ---
 slayout: page
-title: project blank
-description: I have to write something
+title: DNA Alteration & Pharmacological Response
+description:
 img:
 importance: 1
 category: work
 ---
-Trust me, I have something to show, I will update this page as soon as I can!
+# Data Upload and Inspection
+
+    load("project_dataset.RData")
+
+    head(CCLE_MUT_CNA_AMP_DEL_binary_Revealer[,1:4])
+
+    ##                  DMS53_LUNG SW1116_LARGE_INTESTINE NCIH1694_LUNG P3HR1_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE
+    ## AKT3_MUT                  0                      0             0                                        0
+    ## ABI1_MUT                  0                      0             0                                        0
+    ## CDH2_MUT                  0                      0             0                                        0
+    ## LOC100130776_MUT          0                      0             0                                        0
+    ## HDAC6_MUT                 0                      0             0                                        0
+    ## BCL2L11_MUT               0                      0             0                                        0
+
+`<br>` The **CCLE\_MUT\_CNA\_AMP\_DEL\_binary\_Revealer** file contains
+mutations for each cell line, from the CCLE project. Each line
+corresponds to a mutation (of various types) in a gene; for example
+HDAC6\_MUT indicates a single base mutation (MUT) in the HDAC6 gene.
+Each column from the third corresponds to a cell line. An entry to 1
+indicates that the mutation in that gene is present in the cell line,
+while 0 indicates that the mutation is not present in the cell line.
+More info about the project can be found here:
+[https://portals.broadinstitute.org/ccle/about](https://portals.broadinstitute.org/ccle/about).
+
+    target <- target_data_NAcount_August21
+    row.names(target) <- as.character(target[,1])
+    target <- target[,-1]
+    head(target[,1:4])
+
+    ##                   X22RV1_PROSTATE X2313287_STOMACH X42MGBA_CENTRAL_NERVOUS_SYSTEM X451LU_SKIN
+    ## (5Z)-7-Oxozeaenol       0.8625642        0.7597489                      0.6585792   0.1044209
+    ## 5-Fluorouracil          0.4865437        0.6063343                      0.7244520   0.9585177
+    ## 681640                  0.9579365        0.9682534                      0.9476494         NaN
+    ## A-443654                      NaN              NaN                            NaN         NaN
+    ## A-770041                      NaN              NaN                            NaN         NaN
+    ## Afatinib (1)            0.9808510        0.9815897                      0.9844018   0.9888358
+
+`<br>` The **target\_data\_NAcount\_August21** file contains the response
+of cell lines to various pharmacological compounds, from the GDSC
+project. Each row corresponds to a compound; each column corresponds to
+a cell line. The value of an entry is a measure of how much the cell
+line responds to the drug compound. More info about the project can be
+found here: [https://www.cancerrxgene.org/](https://www.cancerrxgene.org/)
+
+    library(readr)
+    pathways <- read_delim("PathwayCommons12.panther.hgnc.txt",
+                "\t", escape_double = FALSE,
+                col_types = cols(INTERACTION_DATA_SOURCE = col_skip(),
+                INTERACTION_PUBMED_ID = col_skip(),
+                INTERACTION_TYPE = col_skip(), MEDIATOR_IDS = col_skip(),
+                PATHWAY_NAMES = col_skip()), trim_ws = TRUE)
+    head(pathways)
+
+    ## # A tibble: 6 × 2
+    ##   PARTICIPANT_A PARTICIPANT_B
+    ##`<chr>`         `<chr>`
+    ## 1 ABAT          ALDH5A1
+    ## 2 ABAT          ALDH6A1
+    ## 3 ABAT          CSAD
+    ## 4 ABAT          GAD1
+    ## 5 ABAT          GAD2
+    ## 6 ACHE          CHEBI:15354
+
+The **PathwayCommons12.panther.hgnc** file contains all the gene-gene
+interactions discovered so far; this is useful in order to smooth the
+mutations matrix, which is extremely sparse. It has been downloaded from
+[https://www.pathwaycommons.org/](https://www.pathwaycommons.org/).
+
+## Needed Packages
+
+    suppressPackageStartupMessages({
+    conflictRules("DelayedArray", exclude = "seed")
+    library(NMF)
+    library(SummarizedExperiment)
+    library(netSmooth)
+    library(stringi)
+    library(stringr)
+    library(readr)
+    library(igraph)
+    library(tidyverse)
+    library(caret)
+    library(neuralnet)
+    library(plotly)
+    })
+
+# Mutations Matrix Smoothing
+
+The CCLE dataset sonsiders 48270 mutations: since the human genetic pool
+consists of around 20000 genes, and each one can mutate in three
+different ways (insertion, deletion, single-base mutation, the dataset
+is involving almost every possible mutation (20k\*3 = 60k). It is
+necessary to select the most relevant mutations, because they exceed
+enourmously the number of cell lines, having a strong impact on future
+computations. The Non-Negative Matrix Factorization (NMF) is a powerful
+tool to perform feature selection, but it works well with non-sparse
+matrices.
+
+The CCLE dataset appears to be extremely sparse, as it is possible to
+appreciate from the following heatmap. Even though the size has been
+reduced for computational reasons, the same situation can be extended to
+the whole set.
+
+    heatmap(as.matrix(CCLE_MUT_CNA_AMP_DEL_binary_Revealer[1:200, 1:200]))
+
+![](project_work_files/figure-markdown_strict/unnamed-chunk-5-1.png)
+
+It may be useful to rename the matrices to make them more
+“user-friendly” to handle
+
+    mutations <- CCLE_MUT_CNA_AMP_DEL_binary_Revealer
+    drugs <- target_data_NAcount_August21
+
+It is important to work with comparable datasets, containing the same
+cell lines: this will enable robust results in terms of model
+construction. In the following lines of code, only common cell lines
+will be kept, filtering out the uncommon.
+
+    tissues_CCLE <- colnames(mutations)
+    tissues_CCLE <- unique(gsub("[^_]*_(.*)", "\\1", tissues_CCLE))
+
+    tissues_GDSC <- colnames(drugs)[-1]
+    tissues_GDSC <- unique(gsub("[^_]*_(.*)", "\\1", tissues_GDSC))
+
+    # Which and how many different tissues are being considered?
+    (tissues <- sort(intersect(tissues_CCLE, tissues_GDSC)))
+
+    ##  [1] "AUTONOMIC_GANGLIA"                  "BILIARY_TRACT"                      "BONE"                               "BREAST"
+    ##  [5] "CENTRAL_NERVOUS_SYSTEM"             "ENDOMETRIUM"                        "HAEMATOPOIETIC_AND_LYMPHOID_TISSUE" "KIDNEY"
+    ##  [9] "LARGE_INTESTINE"                    "LIVER"                              "LUNG"                               "OESOPHAGUS"
+    ## [13] "OVARY"                              "PANCREAS"                           "PLEURA"                             "PROSTATE"
+    ## [17] "SKIN"                               "SMALL_INTESTINE"                    "SOFT_TISSUE"                        "STOMACH"
+    ## [21] "THYROID"                            "UPPER_AERODIGESTIVE_TRACT"          "URINARY_TRACT"
+
+    k <- length(tissues)
+
+    # Keeping only common cell lines
+    mutations <- mutations[, grep(paste(tissues, sep = "", collapse = "|"), colnames(mutations))]
+    drugs <- drugs[, grep(paste(tissues, sep = "", collapse = "|"), colnames(drugs))]
+
+It is helpful to perform smoothing independently for mutations,
+insertions and deletions: the Pathway Commons interaction database
+considers gene-gene relationships and the smoothing algorithm (package
+*netSmooth*) recognizes the gene names in the dataset with respect to
+the adjacency matrix built on the interaction database itself. The
+following process is meant to separate the datasets into three smaller
+datasets, apply smoothing and then rebuild the original dataset, that
+now will include the non-sparse information.
+
+    # Creation of the three datasets based on the type of mutation
+    mutations_MUT <- mutations[grep("_MUT", row.names(mutations)), ]
+    mutations_AMP <- mutations[grep("_AMP", row.names(mutations)), ]
+    mutations_DEL <- mutations[grep("_DEL", row.names(mutations)), ]
+
+    # Remove the subscripts from the lines of the matrices to be analyzed
+    row.names(mutations_MUT) <- str_replace_all(row.names(mutations_MUT), "_MUT", "")
+    row.names(mutations_AMP) <- str_replace_all(row.names(mutations_AMP), "_AMP", "")
+    row.names(mutations_DEL) <- str_replace_all(row.names(mutations_DEL), "_DEL", "")
+
+    # Creating the Adjacency Matrix
+    adj <- get.adjacency(graph.edgelist(as.matrix(pathways), directed=FALSE))
+
+    # Network smoothing
+    smoothed_MUT <- netSmooth(as.matrix(mutations_MUT), adj, alpha=0.5)
+
+    ## Using given alpha: 0.5
+
+    smoothed_AMP <- netSmooth(as.matrix(mutations_AMP), adj, alpha=0.5)
+
+    ## Using given alpha: 0.5
+
+    smoothed_DEL <- netSmooth(as.matrix(mutations_DEL), adj, alpha=0.5)
+
+    ## Using given alpha: 0.5
+
+    # Rebuild
+    row.names(smoothed_MUT) <- paste0(row.names(smoothed_MUT), "_MUT", "")
+    row.names(smoothed_DEL) <- paste0(row.names(smoothed_DEL), "_DEL", "")
+    row.names(smoothed_AMP) <- paste0(row.names(smoothed_AMP), "_AMP", "")
+    mutations.smoothed <- rbind(smoothed_MUT, smoothed_AMP, smoothed_DEL)
+
+    # If a mutation is not present in any cell line, you can remove it
+    # (it is also an NMF algorithm constraint)
+    mutations.smoothed <- mutations.smoothed[apply(mutations.smoothed, 1, function(x) !all(x==0)),]
+
+# Cancer-targeted Feature Selection
+
+The necessity of selecting the most relevant mutations has already been
+acknowledged. As a plus, it can improve the specificity of the analysis
+if each cancer type was considered independently. It should be worth
+focusing on tumors highly represented in terms of cell lines: also a
+“poorly-represented” cancer type will be included to check whether the
+lower amount of data affects the performance of the model. First of all,
+let’s check the number of cell lines per tumor.
+
+    tissues_CCLE <- colnames(mutations.smoothed)
+    tissues_CCLE <- unique(gsub("[^_]*_(.*)", "\\1", tissues_CCLE))
+
+    tissues_occurrencies <- c()
+    for (i in 1:length(tissues_CCLE)) {
+      tmp <- grep(tissues_CCLE[i], colnames(mutations.smoothed))
+      tissues_occurrencies[i] <- length(tmp)
+      rm(tmp)
+    }
+    tissues_occurrencies <- as.data.frame(t(tissues_occurrencies))
+    colnames(tissues_occurrencies) <- tissues_CCLE
+
+    # Sort tissues_occurrencies data frame column-wise
+    sorted_tissues_occurrencies <- tissues_occurrencies[, order(-apply(tissues_occurrencies, 2, sum))]
+
+    # Print the sorted data frame
+    print(sorted_tissues_occurrencies[1:5])
+
+    ##   LUNG HAEMATOPOIETIC_AND_LYMPHOID_TISSUE CENTRAL_NERVOUS_SYSTEM SKIN LARGE_INTESTINE
+    ## 1  185                                182                     68   61              59
+
+*Lung* and *Haematopoietic and Lymphoid Tissue* cancers will be included
+in the analysis; also *Breast* cancer will be considered, due to its
+clinical relevance, despite offering just one third of the data with
+respect to the other two cancer types.
+
+In the following lines of code, the most relevant mutations for these
+three tumors will be extracted, once again through NMF and exploiting
+its built-in function featureScore(). The value **s** stands for the
+number of extracted mutations. **k** is the number of clusters.
+
+    s <- 250
+    k<- 4
+
+    # LUNG --------------------------------------------------------------------
+
+    # Filtering out LUNG from data
+    mutations.smoothed_LUNG <- mutations.smoothed[, grep("_LUNG", colnames(mutations.smoothed))]
+    mutations.smoothed_LUNG <- mutations.smoothed_LUNG[apply(mutations.smoothed_LUNG, 1, function(x) !all(x==0)),]
+
+    # NMF
+    res_LUNG <- nmf(mutations.smoothed_LUNG, k, 'lee', seed=123456)
+    mutation_score_LUNG <- featureScore(res_LUNG)
+
+    # Feature selection
+    mutations_topscore_LUNG <- sort(featureScore(res_LUNG), decreasing = T)[1:s]
+
+    # Filter the mutations matrix based on scores
+    index <- c()
+    for (i in 1:length(mutations_topscore_LUNG)) {
+      tmp <- grep(paste0("^", names(mutations_topscore_LUNG[i]), "$"), row.names(mutations))
+      if(length(tmp)>1) cat(paste0(tmp, " "))
+      index <- c(index, tmp)
+    }
+
+    mutations.filtered_LUNG <- mutations[index, grep("_LUNG", colnames(mutations))]
+
+    # HLT ---------------------------------------------------------------------
+
+    # Filtering out HLT from data
+    mutations.smoothed_HLT <- mutations.smoothed[, grep("_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE", colnames(mutations.smoothed))]
+    mutations.smoothed_HLT <- mutations.smoothed_HLT[apply(mutations.smoothed_HLT, 1, function(x) !all(x==0)),]
+
+    # NMF
+    res_HLT <- nmf(mutations.smoothed_HLT, k, 'lee', seed=123456)
+    mutation_score_HLT <- featureScore(res_HLT)
+
+    # Feature selection
+    mutations_topscore_HLT <- sort(featureScore(res_HLT), decreasing = T)[1:s]
+
+    # Filter the mutations matrix based on scores
+    index <- c()
+    for (i in 1:length(mutations_topscore_HLT)) {
+      tmp <- grep(paste0("^", names(mutations_topscore_HLT[i]), "$"), row.names(mutations))
+      if(length(tmp)>1) cat(paste0(tmp, " "))
+      index <- c(index, tmp)
+    }
+
+    mutations.filtered_HLT <- mutations[index, grep("_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE", colnames(mutations))]
+
+    # BREAST ---------------------------------------------------------------------
+
+    # Filtering out BREAST from data
+    mutations.smoothed_BREAST <- mutations.smoothed[, grep("_BREAST", colnames(mutations.smoothed))]
+    mutations.smoothed_BREAST <- mutations.smoothed_BREAST[apply(mutations.smoothed_BREAST, 1, function(x) !all(x==0)),]
+
+    # NMF
+    res_BREAST <- nmf(mutations.smoothed_BREAST, k, 'lee', seed=123456)
+    mutation_score_BREAST <- featureScore(res_BREAST)
+
+    # Feature selection
+    mutations_topscore_BREAST <- sort(featureScore(res_BREAST), decreasing = T)[1:s]
+
+    # Filter the mutations matrix based on scores
+    index <- c()
+    for (i in 1:length(mutations_topscore_BREAST)) {
+      tmp <- grep(paste0("^", names(mutations_topscore_BREAST[i]), "$"), row.names(mutations))
+      if(length(tmp)>1) cat(paste0(tmp, " "))
+      index <- c(index, tmp)
+    }
+
+    mutations.filtered_BREAST <- mutations[index, grep("_BREAST", colnames(mutations))]
+
+# Final Data & Model Information
+
+Let’s inspect the data. Besides the target data, already shown in the
+first chapter, now three tumor-targeted matrices have been created with
+a reduced and relevant number of mutations. For example, this is the
+matrix for Breast cancer, with 10 specific mutations, taken randomly.
+
+    mutations.filtered_BREAST[1:10,1:5]
+
+    ##              HCC2157_BREAST HS739T_BREAST HCC38_BREAST DU4475_BREAST MDAMB175VII_BREAST
+    ## PDCD6_AMP                 0             0            0             0                  0
+    ## EXOC3_AMP                 0             0            0             0                  0
+    ## C5orf55_AMP               0             0            0             0                  0
+    ## PP7080_AMP                0             0            0             0                  0
+    ## AHRR_AMP                  0             0            0             0                  0
+    ## SLC9A3_AMP                0             0            0             0                  0
+    ## PLEKHG4B_AMP              0             0            0             0                  0
+    ## LRRC14B_AMP               0             0            0             0                  0
+    ## MIR4456_AMP               0             0            0             0                  0
+    ## TPPP_AMP                  0             0            0             0                  0
+
+    sample(names(mutations_topscore_BREAST), 10)
+
+    ##  [1] "TTC22_DEL"        "LOC100129924_DEL" "PPP1R14B_DEL"     "ADAMTS12_AMP"     "LDLRAD1_DEL"      "LSP1P3_AMP"       "TCEANC2_DEL"
+    ##  [8] "TC2N_AMP"         "HEATR8-TTC4_DEL"  "LINC00466_DEL"
+
+Now that the mutation matrix has been reduced in size by considering
+both the most relevant mutations and the single cancer, it is possible
+to train and test a model able to predict the effect of a drug on a
+patient based on the cancer type and his mutational landscape.
+
+## Lung Cancer Analysis
+
+First thing is assemble the matrix for the model to be built on. One
+fundamental step is to consider only common cell lines, present both in
+the mutation and the target data.
+
+    mutL <- mutations.filtered_LUNG
+
+    # Filtering out LUNG from data
+    targetL <- target[, grep("_LUNG", colnames(target))]
+
+    target.common <- targetL[, which(colnames(targetL) %in% colnames(mutL))]
+    mutations.common <- mutL[, which(colnames(mutL) %in% colnames(targetL))]
+    target.common <- t(target.common[, order(colnames(target.common))])
+    mutations.common <- t(mutations.common[, order(colnames(mutations.common))])
+
+    drug_names <- rownames(target)
+
+The following step consists of creating a list of matrices, one for each
+single drug, having the *response variable y* to be predicted as the
+drug effectiveness. The mutation landscape for each cell line plays the
+role of *predictors*. For example…
+
+    # Creating the matrices with the response y for the single drug
+    tm.list <- list()
+
+    for (i in 1:length(drug_names)) {
+      tmp <- cbind(target.common[,i], mutations.common)
+    colnames(tmp)[1] <- "drug"
+      tmp <- tmp[-which(is.na(tmp[,1])), ] # remove cell lines with NaN on drug response
+      tmp <- tmp[-which(rowSums(tmp[,-1]) == 0), ]
+      tm.list[[i]] <- as.data.frame(tmp)
+      rm(tmp)
+    }
+
+    names(tm.list) <- row.names(targetL)
+
+    tm.list[[1]][1:10,1:5]
+
+    ##                   drug ZNF197_DEL ZNF501_DEL TCAIM_DEL ZNF660_DEL
+    ## ABC1_LUNG    0.6937080          0          0         0          0
+    ## BEN_LUNG     0.9529593          1          1         1          1
+    ## CALU3_LUNG   0.8237809          0          0         0          0
+    ## CHAGOK1_LUNG 0.6811019          1          1         1          1
+    ## COLO668_LUNG 0.8997014          0          0         0          0
+    ## CORL105_LUNG 0.7064098          1          1         1          1
+    ## CORL95_LUNG  0.9313234          0          0         0          0
+    ## CPCN_LUNG    0.7310353          1          1         1          1
+    ## DMS114_LUNG  0.6837069          0          0         0          0
+    ## DMS273_LUNG  0.4735742          0          0         0          0
+
+    #names(tm.list)[1]
+
+The data are prepared as usual subdividing each matrix into training and
+test set.
+
+    # Set the formula
+    f <- as.formula("drug ~ .")
+
+    # Prepare Training & Test set
+    train_frac <- 0.8
+    train_set <- list()
+    test_set <- list()
+    for (i in 1:length(drug_names)) {
+      data <- tm.list[[i]]
+      index <- sample(1:nrow(data), round(train_frac*nrow(data)))
+      train_set[[i]] <- data[index,]
+      test_set[[i]] <- data[-index,]
+    }
+
+Two different model types are built and compared in terms of
+performance: a Generalized Linear Model and a Neural Network.
+
+Let’s have a look at the GLM first. A simple cross-validation control is
+applied in order to obtain a model whose performance is realistic.
+
+    MSE.glm_LUNG <- c()
+    glm.models_LUNG <-list()
+    response.glm_LUNG <- list()
+    for (i in 1:length(drug_names)) {
+      train <- train_set[[i]]
+      test <- test_set[[i]]
+
+    glm.fit <- caret::train(form = f,
+                              data      = train,
+                              trControl = trainControl(method = "cv", number = 10),
+                              method    = "glm",
+    family    = gaussian()
+      )
+      glm.models_LUNG[[i]] <- glm.fit
+      pr.glm <- predict(glm.fit,test)
+      response.glm_LUNG[[i]] <- pr.glm
+      MSE.glm_LUNG[i] <- sum((pr.glm - test$drug)^2)/nrow(test)
+    }
+    names(MSE.glm_LUNG) <- drug_names
+    names(response.glm_LUNG) <- drug_names
+
+The NN instead underwent a refinement processe. The number of hidden
+layers has always been kept to three, but the number of nodes has been
+selected after various attempts. First a simple model was chosen with a
+5-5-5 layout, giving decent results; the high number of predictors may
+have suggested the use of a more complex model, such a 15-15-15 layout:
+the prediction error increased consistently. The model proposed below
+uses a 15-10-5 cascade-like layout, averaging the best performance error
+over the whole bunch of drugs analyzed.
+
+    MSE.nn_LUNG <- c()
+    nn.models_LUNG <- list()
+    response.nn_LUNG <- list()
+    for (i in 1:length(drug_names)) {
+      train <- train_set[[i]]
+      test <- test_set[[i]]
+
+    nn.fit <- caret::train(form = f,
+                             data      = train,
+                             trControl = trainControl(method = "none"),
+                             method    = "neuralnet",
+                             linear.output = TRUE,
+                             tuneGrid = expand.grid(
+                               layer1 = 15,
+                               layer2 = 10,
+                               layer3 = 5),
+                             metric = "RMSE"
+      )
+      nn.models_LUNG[[i]] <- nn.fit
+      pr.nn <- predict(nn.fit, test)
+      response.nn_LUNG[[i]] <- pr.nn
+      MSE.nn_LUNG[i] <- sum((pr.nn - test$drug)^2)/nrow(test)
+    }
+    names(MSE.nn_LUNG) <- drug_names
+    names(response.nn_LUNG) <- drug_names
+
+Let’s compare the performance of these two different model approaches:
+the Neural Network seems to fit better the data, averaging a lower mean
+squared error.
+
+    #mean(MSE.glm_LUNG)
+    #mean(MSE.nn_LUNG)
+
+    par(mfrow=c(1,2))
+    plot(MSE.glm_LUNG, type="l", col="blue", main="GLM", ylim = c(0,0.5), xlab="drugs", ylab="error")
+    abline(h=mean(MSE.glm_LUNG), col="red")
+    plot(MSE.nn_LUNG, type="l", col="blue", main="Neural Network", ylim = c(0,0.5), xlab="drugs", ylab="error")
+    abline(h=mean(MSE.nn_LUNG), col="red")
+
+![](project_work_files/figure-markdown_strict/unnamed-chunk-17-1.png)
+
+And in a boxplot flavor…
+
+    par(mfrow=c(1,2))
+    boxplot(MSE.glm_LUNG)
+    boxplot(MSE.nn_LUNG)
+
+![](project_work_files/figure-markdown_strict/unnamed-chunk-18-1.png)
+
+## HLT Cancer Analysis
+
+This and the next section will be just presented in terms of code: only
+the results will be discussed, as the algorithm being used is the same.
+
+    mutH <- mutations.filtered_HLT
+
+    # Filtering out HLT from data
+    targetH <- target[, grep("_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE", colnames(target))]
+
+    target.common <- targetH[, which(colnames(targetH) %in% colnames(mutH))]
+    mutations.common <- mutH[, which(colnames(mutH) %in% colnames(targetH))]
+    target.common <- t(target.common[, order(colnames(target.common))])
+    mutations.common <- t(mutations.common[, order(colnames(mutations.common))])
+
+    drug_names <- rownames(target)
+
+    # Creating the matrices with the response y for the single drug
+    tm.list <- list()
+
+    for (i in 1:length(drug_names)) {
+      tmp <- cbind(target.common[,i], mutations.common)
+    colnames(tmp)[1] <- "drug"
+      tmp <- tmp[-which(is.na(tmp[,1])), ] # remove cell lines with NaN on drug response
+      tmp <- tmp[-which(rowSums(tmp[,-1]) == 0), ]
+      tm.list[[i]] <- as.data.frame(tmp)
+      rm(tmp)
+    }
+
+    names(tm.list) <- row.names(targetH)
+
+    tm.list[[1]][1:10,1:5]
+
+    ##                                                    drug MIR1253_DEL SMYD4_DEL OVCA2_DEL RTN4RL1_DEL
+    ## ALLSIL_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE    0.62925057           1         1         1           1
+    ## AMO1_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE      0.69460228           0         0         0           0
+    ## BL41_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE      0.62164778           1         1         1           1
+    ## CMK_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE       0.66966436           1         1         1           1
+    ## DEL_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE       0.75351781           0         0         0           0
+    ## DND41_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE     0.58472259           0         0         0           0
+    ## EM2_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE       0.60183747           1         1         1           1
+    ## EOL1_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE      0.02374275           0         0         0           0
+    ## GA10_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE      0.75515648           0         0         0           0
+    ## GRANTA519_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE 0.79612871           1         1         1           1
+
+    #names(tm.list)[1]
+
+    f <- as.formula("drug ~ .")
+
+    # Training & Test set
+    train_frac <- 0.8
+    train_set <- list()
+    test_set <- list()
+    for (i in 1:length(drug_names)) {
+      data <- tm.list[[i]]
+      index <- sample(1:nrow(data), round(train_frac*nrow(data)))
+      train_set[[i]] <- data[index,]
+      test_set[[i]] <- data[-index,]
+    }
+
+    # GLM
+    MSE.glm_HLT <- c()
+    glm.models_HLT <-list()
+    response.glm_HLT <- list()
+    for (i in 1:length(drug_names)) {
+      train <- train_set[[i]]
+      test <- test_set[[i]]
+
+    glm.fit <- caret::train(form = f,
+                              data      = train,
+                              trControl = trainControl(method = "cv", number = 10),
+                              method    = "glm",
+    family    = gaussian()
+      )
+      glm.models_HLT[[i]] <- glm.fit
+      pr.glm <- predict(glm.fit,test)
+      response.glm_HLT[[i]] <- pr.glm
+      MSE.glm_HLT[i] <- sum((pr.glm - test$drug)^2)/nrow(test)
+    }
+    names(MSE.glm_HLT) <- drug_names
+    names(response.glm_HLT) <- drug_names
+
+    # NN
+    MSE.nn_HLT <- c()
+    nn.models_HLT <- list()
+    response.nn_HLT <- list()
+    for (i in 1:length(drug_names)) {
+      train <- train_set[[i]]
+      test <- test_set[[i]]
+
+    nn.fit <- caret::train(form = f,
+                             data      = train,
+                             trControl = trainControl(method = "none"),
+                             method    = "neuralnet",
+                             linear.output = TRUE,
+                             tuneGrid = expand.grid(
+                               layer1 = 15,
+                               layer2 = 10,
+                               layer3 = 5),
+                             metric = "RMSE"
+      )
+      nn.models_HLT[[i]] <- nn.fit
+      pr.nn <- predict(nn.fit, test)
+      response.nn_HLT[[i]] <- pr.nn
+      MSE.nn_HLT[i] <- sum((pr.nn - test$drug)^2)/nrow(test)
+    }
+    names(MSE.nn_HLT) <- drug_names
+    names(response.nn_HLT) <- drug_names
+
+## Breast Cancer Analysis
+
+    mutB <- mutations.filtered_BREAST
+
+    # Filtering out BREAST from data
+    targetB <- target[, grep("_BREAST", colnames(target))]
+
+    target.common <- targetB[, which(colnames(targetB) %in% colnames(mutB))]
+    mutations.common <- mutB[, which(colnames(mutB) %in% colnames(targetB))]
+    target.common <- t(target.common[, order(colnames(target.common))])
+    mutations.common <- t(mutations.common[, order(colnames(mutations.common))])
+
+    drug_names <- rownames(target)
+
+    # Creating the matrices with the response y for the single drug
+    tm.list <- list()
+
+    for (i in 1:length(drug_names)) {
+      tmp <- cbind(target.common[,i], mutations.common)
+    colnames(tmp)[1] <- "drug"
+      tmp <- tmp[-which(is.na(tmp[,1])), ] # remove cell lines with NaN on drug response
+      tmp <- tmp[-which(rowSums(tmp[,-1]) == 0), ]
+      tm.list[[i]] <- as.data.frame(tmp)
+      rm(tmp)
+    }
+
+    names(tm.list) <- row.names(targetB)
+
+    tm.list[[1]][1:10,1:5]
+
+    ##                     drug PDCD6_AMP EXOC3_AMP C5orf55_AMP PP7080_AMP
+    ## BT20_BREAST    0.7200960         1         1           1          1
+    ## BT474_BREAST   0.7017970         1         1           1          1
+    ## CAL120_BREAST  0.5741549         1         1           1          1
+    ## CAL51_BREAST   0.5353245         0         0           0          0
+    ## CAL851_BREAST  0.6662680         1         1           1          1
+    ## CAMA1_BREAST   0.8345755         0         0           0          0
+    ## EFM19_BREAST   0.7937339         0         0           0          0
+    ## EFM192A_BREAST 0.7805405         0         0           0          0
+    ## EVSAT_BREAST   0.7471169         0         0           0          0
+    ## HCC1143_BREAST 0.7371067         1         1           1          1
+
+    #names(tm.list)[1]
+
+    f <- as.formula("drug ~ .")
+
+    # Training & Test set
+    train_frac <- 0.8
+    train_set <- list()
+    test_set <- list()
+    for (i in 1:length(drug_names)) {
+      data <- tm.list[[i]]
+      index <- sample(1:nrow(data), round(train_frac*nrow(data)))
+      train_set[[i]] <- data[index,]
+      test_set[[i]] <- data[-index,]
+    }
+
+    # GLM
+    MSE.glm_BREAST <- c()
+    glm.models_BREAST <-list()
+    response.glm_BREAST <- list()
+    for (i in 1:length(drug_names)) {
+      train <- train_set[[i]]
+      test <- test_set[[i]]
+
+    glm.fit <- caret::train(form = f,
+                              data      = train,
+                              trControl = trainControl(method = "cv", number = 10),
+                              method    = "glm",
+    family    = gaussian()
+      )
+      glm.models_BREAST[[i]] <- glm.fit
+      pr.glm <- predict(glm.fit,test)
+      response.glm_BREAST[[i]] <- pr.glm
+      MSE.glm_BREAST[i] <- sum((pr.glm - test$drug)^2)/nrow(test)
+    }
+    names(MSE.glm_BREAST) <- drug_names
+    names(response.glm_BREAST) <- drug_names
+
+    # NN
+    MSE.nn_BREAST <- c()
+    nn.models_BREAST <- list()
+    response.nn_BREAST <- list()
+    for (i in 1:length(drug_names)) {
+      train <- train_set[[i]]
+      test <- test_set[[i]]
+
+    nn.fit <- caret::train(form = f,
+                             data      = train,
+                             trControl = trainControl(method = "none"),
+                             method    = "neuralnet",
+                             linear.output = TRUE,
+                             tuneGrid = expand.grid(
+                               layer1 = 15,
+                               layer2 = 10,
+                               layer3 = 5),
+                             metric = "RMSE"
+      )
+      nn.models_BREAST[[i]] <- nn.fit
+      pr.nn <- predict(nn.fit, test)
+      response.nn_BREAST[[i]] <- pr.nn
+      MSE.nn_BREAST[i] <- sum((pr.nn - test$drug)^2)/nrow(test)
+    }
+    names(MSE.nn_BREAST) <- drug_names
+    names(response.nn_BREAST) <- drug_names
+
+## Results
+
+It is worth comparing the performance of the models applied to the three
+selected cancer types.
+
+    mean_errors <- sapply(list(MSE.glm_LUNG, MSE.nn_LUNG, MSE.glm_HLT, MSE.nn_HLT, MSE.glm_BREAST, MSE.nn_BREAST), mean)
+
+    model <- rep(c("GLM", "NN"), 3)
+    tumor <- c(rep("LUNG", 2), rep("HLT", 2), rep("BREAST", 2))
+    performance <- data.frame(model, tumor, mean_errors)
+
+    ggplot(performance, aes(fill=model, y=mean_errors, x=tumor)) +
+           geom_bar(position="dodge", stat="identity")
+
+![](project_work_files/figure-markdown_strict/unnamed-chunk-23-1.png)
+
+The model performance is consistent among different cancer types: the
+neural network approach offers the lowest error. Surprisingly, Breast
+cancer data give a better performance than HLT, even though the number
+of involved cell lines is significantly lower: hence, the model is
+robust and independent from the mass of data available. This is an
+important feature, especially in cancer research, since data may be
+partly missing and/or scarce.
