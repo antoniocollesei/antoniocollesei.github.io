@@ -2,34 +2,34 @@
 <html><body>
 <h1 id="data-upload-and-inspection">Data Upload and Inspection</h1>
 
-<p>```r class.source=”bg-danger”, class.output=”bg-warning”
-load(“project_dataset.RData”)
-head(CCLE_MUT_CNA_AMP_DEL_binary_Revealer[,1:4])</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-    ##                  DMS53_LUNG SW1116_LARGE_INTESTINE NCIH1694_LUNG P3HR1_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE
-    ## AKT3_MUT                  0                      0             0                                        0
-    ## ABI1_MUT                  0                      0             0                                        0
-    ## CDH2_MUT                  0                      0             0                                        0
-    ## LOC100130776_MUT          0                      0             0                                        0
-    ## HDAC6_MUT                 0                      0             0                                        0
-    ## BCL2L11_MUT               0                      0             0                                        0
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s2">"project_dataset.RData"</span><span class="p">)</span><span class="w">
+</span><span class="n">head</span><span class="p">(</span><span class="n">CCLE_MUT_CNA_AMP_DEL_binary_Revealer</span><span class="p">[,</span><span class="m">1</span><span class="o">:</span><span class="m">4</span><span class="p">])</span><span class="w">
+</span></code></pre></div></div>
 
-The **CCLE\_MUT\_CNA\_AMP\_DEL\_binary\_Revealer** file contains
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>##                  DMS53_LUNG SW1116_LARGE_INTESTINE NCIH1694_LUNG P3HR1_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE
+## AKT3_MUT                  0                      0             0                                        0
+## ABI1_MUT                  0                      0             0                                        0
+## CDH2_MUT                  0                      0             0                                        0
+## LOC100130776_MUT          0                      0             0                                        0
+## HDAC6_MUT                 0                      0             0                                        0
+## BCL2L11_MUT               0                      0             0                                        0
+</code></pre></div></div>
+
+<p>The <strong>CCLE_MUT_CNA_AMP_DEL_binary_Revealer</strong> file contains
 mutations for each cell line, from the CCLE project. Each line
 corresponds to a mutation (of various types) in a gene; for example
-HDAC6\_MUT indicates a single base mutation (MUT) in the HDAC6 gene.
+HDAC6_MUT indicates a single base mutation (MUT) in the HDAC6 gene.
 Each column from the third corresponds to a cell line. An entry to 1
 indicates that the mutation in that gene is present in the cell line,
 while 0 indicates that the mutation is not present in the cell line.
 More info about the project can be found here:
-[https://portals.broadinstitute.org/ccle/about](https://portals.broadinstitute.org/ccle/about).
+<a href="https://portals.broadinstitute.org/ccle/about" rel="external nofollow noopener" target="_blank">https://portals.broadinstitute.org/ccle/about</a>.</p>
 
-```r
-target &lt;- target_data_NAcount_August21
-row.names(target) &lt;- as.character(target[,1])
-target &lt;- target[,-1]
-head(target[,1:4])
-</code></pre></div></div>
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">target</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">target_data_NAcount_August21</span><span class="w">
+</span><span class="n">row.names</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">as.character</span><span class="p">(</span><span class="n">target</span><span class="p">[,</span><span class="m">1</span><span class="p">])</span><span class="w">
+</span><span class="n">target</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">target</span><span class="p">[,</span><span class="m">-1</span><span class="p">]</span><span class="w">
+</span><span class="n">head</span><span class="p">(</span><span class="n">target</span><span class="p">[,</span><span class="m">1</span><span class="o">:</span><span class="m">4</span><span class="p">])</span><span class="w">
+</span></code></pre></div></div>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>##                   X22RV1_PROSTATE X2313287_STOMACH X42MGBA_CENTRAL_NERVOUS_SYSTEM X451LU_SKIN
 ## (5Z)-7-Oxozeaenol       0.8625642        0.7597489                      0.6585792   0.1044209
