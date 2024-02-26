@@ -1,8 +1,8 @@
 ---
-slayout: page
+layout: page
 title: DNA Alteration & Pharmacological Response
-description:
-img:
+description: A simple R project to predict pharmacological response from mutational data in cancer cell lines
+img: assets/img/cell_lines.jpg
 importance: 1
 category: work
 ---
