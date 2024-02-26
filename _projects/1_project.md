@@ -21,15 +21,8 @@ head(CCLE_MUT_CNA_AMP_DEL_binary_Revealer[,1:4])
     ## HDAC6_MUT                 0                      0             0                                        0
     ## BCL2L11_MUT               0                      0             0                                        0
 
-The **CCLE\_MUT\_CNA\_AMP\_DEL\_binary\_Revealer** file contains
-mutations for each cell line, from the CCLE project. Each line
-corresponds to a mutation (of various types) in a gene; for example
-HDAC6\_MUT indicates a single base mutation (MUT) in the HDAC6 gene.
-Each column from the third corresponds to a cell line. An entry to 1
-indicates that the mutation in that gene is present in the cell line,
-while 0 indicates that the mutation is not present in the cell line.
-More info about the project can be found here:
-[https://portals.broadinstitute.org/ccle/about](https://portals.broadinstitute.org/ccle/about).
+The **CCLE\_MUT\_CNA\_AMP\_DEL\_binary\_Revealer** file contains mutations for each cell line, from the CCLE project. Each line corresponds to a mutation (of various types) in a gene; for example HDAC6\_MUT indicates a single base mutation (MUT) in the HDAC6 gene.
+Each column from the third corresponds to a cell line. An entry to 1 indicates that the mutation in that gene is present in the cell line, while 0 indicates that the mutation is not present in the cell line. More info about the project can be found here: [https://portals.broadinstitute.org/ccle/about](https://portals.broadinstitute.org/ccle/about).
 
 ```r
 target <- target_data_NAcount_August21
@@ -46,12 +39,7 @@ head(target[,1:4])
     ## A-770041                      NaN              NaN                            NaN         NaN
     ## Afatinib (1)            0.9808510        0.9815897                      0.9844018   0.9888358
 
-The **target\_data\_NAcount\_August21** file contains the response
-of cell lines to various pharmacological compounds, from the GDSC
-project. Each row corresponds to a compound; each column corresponds to
-a cell line. The value of an entry is a measure of how much the cell
-line responds to the drug compound. More info about the project can be
-found here: [https://www.cancerrxgene.org/](https://www.cancerrxgene.org/)
+The **target\_data\_NAcount\_August21** file contains the response of cell lines to various pharmacological compounds, from the GDSC project. Each row corresponds to a compound; each column corresponds to a cell line. The value of an entry is a measure of how much the cell line responds to the drug compound. More info about the project can be found here: [https://www.cancerrxgene.org/](https://www.cancerrxgene.org/)
 
 ```r
 library(readr)
@@ -74,10 +62,7 @@ head(pathways)
     ## 5 ABAT          GAD2
     ## 6 ACHE          CHEBI:15354
 
-The **PathwayCommons12.panther.hgnc** file contains all the gene-gene
-interactions discovered so far; this is useful in order to smooth the
-mutations matrix, which is extremely sparse. It has been downloaded from
-[https://www.pathwaycommons.org/](https://www.pathwaycommons.org/).
+The **PathwayCommons12.panther.hgnc** file contains all the gene-gene interactions discovered so far; this is useful in order to smooth the mutations matrix, which is extremely sparse. It has been downloaded from [https://www.pathwaycommons.org/](https://www.pathwaycommons.org/).
 
 ## Needed Packages
 
@@ -97,37 +82,23 @@ library(plotly)
 
 # Mutations Matrix Smoothing
 
-The CCLE dataset sonsiders 48270 mutations: since the human genetic pool
-consists of around 20000 genes, and each one can mutate in three
-different ways (insertion, deletion, single-base mutation, the dataset
-is involving almost every possible mutation (20k\*3 = 60k). It is
-necessary to select the most relevant mutations, because they exceed
-enourmously the number of cell lines, having a strong impact on future
-computations. The Non-Negative Matrix Factorization (NMF) is a powerful
-tool to perform feature selection, but it works well with non-sparse
-matrices.
+The CCLE dataset sonsiders 48270 mutations: since the human genetic pool consists of around 20000 genes, and each one can mutate in three different ways (insertion, deletion, single-base mutation, the dataset is involving almost every possible mutation (20k\*3 = 60k). It is
+necessary to select the most relevant mutations, because they exceed enourmously the number of cell lines, having a strong impact on future computations. The Non-Negative Matrix Factorization (NMF) is a powerful tool to perform feature selection, but it works well with non-sparse matrices.
 
-The CCLE dataset appears to be extremely sparse, as it is possible to
-appreciate from the following heatmap. Even though the size has been
-reduced for computational reasons, the same situation can be extended to
-the whole set.
+The CCLE dataset appears to be extremely sparse, as it is possible to appreciate from the following heatmap. Even though the size has been reduced for computational reasons, the same situation can be extended to the whole set.
 
 ```r
 heatmap(as.matrix(CCLE_MUT_CNA_AMP_DEL_binary_Revealer[1:200, 1:200]))
 ```
 
-It may be useful to rename the matrices to make them more
-“user-friendly” to handle
+It may be useful to rename the matrices to make them more “user-friendly” to handle.
 
 ```r
 mutations <- CCLE_MUT_CNA_AMP_DEL_binary_Revealer
 drugs <- target_data_NAcount_August21
 ```
 
-It is important to work with comparable datasets, containing the same
-cell lines: this will enable robust results in terms of model
-construction. In the following lines of code, only common cell lines
-will be kept, filtering out the uncommon.
+It is important to work with comparable datasets, containing the same cell lines: this will enable robust results in terms of model construction. In the following lines of code, only common cell lines will be kept, filtering out the uncommon.
 
 ```r
 tissues_CCLE <- colnames(mutations)
@@ -199,13 +170,7 @@ mutations.smoothed <- mutations.smoothed[apply(mutations.smoothed, 1, function(x
 
 # Cancer-targeted Feature Selection
 
-The necessity of selecting the most relevant mutations has already been
-acknowledged. As a plus, it can improve the specificity of the analysis
-if each cancer type was considered independently. It should be worth
-focusing on tumors highly represented in terms of cell lines: also a
-“poorly-represented” cancer type will be included to check whether the
-lower amount of data affects the performance of the model. First of all,
-let’s check the number of cell lines per tumor.
+The necessity of selecting the most relevant mutations has already been acknowledged. As a plus, it can improve the specificity of the analysis if each cancer type was considered independently. It should be worth focusing on tumors highly represented in terms of cell lines: also a “poorly-represented” cancer type will be included to check whether the lower amount of data affects the performance of the model. First of all, let’s check the number of cell lines per tumor.
 
 ```r
 tissues_CCLE <- colnames(mutations.smoothed)
@@ -231,15 +196,11 @@ print(sorted_tissues_occurrencies[1:5])
     ##   LUNG HAEMATOPOIETIC_AND_LYMPHOID_TISSUE CENTRAL_NERVOUS_SYSTEM SKIN LARGE_INTESTINE
     ## 1  185                                182                     68   61              59
 
-*Lung* and *Haematopoietic and Lymphoid Tissue* cancers will be included
-in the analysis; also *Breast* cancer will be considered, due to its
-clinical relevance, despite offering just one third of the data with
-respect to the other two cancer types.
+*Lung* and *Haematopoietic and Lymphoid Tissue* cancers will be included in the analysis; also *Breast* cancer will be considered, due to its
+clinical relevance, despite offering just one third of the data with respect to the other two cancer types.
 
-In the following lines of code, the most relevant mutations for these
-three tumors will be extracted, once again through NMF and exploiting
-its built-in function featureScore(). The value **s** stands for the
-number of extracted mutations. **k** is the number of clusters.
+In the following lines of code, the most relevant mutations for these three tumors will be extracted, once again through NMF and exploiting
+its built-in function featureScore(). The value **s** stands for the number of extracted mutations. **k** is the number of clusters.
 
 ```r
 s <- 250
@@ -320,9 +281,7 @@ mutations.filtered_BREAST <- mutations[index, grep("_BREAST", colnames(mutations
 
 # Final Data & Model Information
 
-Let’s inspect the data. Besides the target data, already shown in the
-first chapter, now three tumor-targeted matrices have been created with
-a reduced and relevant number of mutations.
+Let’s inspect the data. Besides the target data, already shown in the first chapter, now three tumor-targeted matrices have been created with a reduced and relevant number of mutations.
 
 ```r
 mutations.filtered_BREAST[1:10,1:5]
@@ -340,15 +299,11 @@ mutations.filtered_BREAST[1:10,1:5]
     ## MIR4456_AMP               0             0            0             0                  0
     ## TPPP_AMP                  0             0            0             0                  0
 
-Now that the mutation matrix has been reduced in size by considering
-both the most relevant mutations and the single cancer, it is possible
-to train and test a model able to predict the effect of a drug on a
-patient based on the cancer type and his mutational landscape.
+Now that the mutation matrix has been reduced in size by considering both the most relevant mutations and the single cancer, it is possible to train and test a model able to predict the effect of a drug on a patient based on the cancer type and his mutational landscape.
 
 ## Lung Cancer Analysis
 
-First thing is assemble the matrix for the model to be built on. One
-fundamental step is to consider only common cell lines, present both in
+First thing is assemble the matrix for the model to be built on. One fundamental step is to consider only common cell lines, present both in
 the mutation and the target data.
 
 ```r
@@ -365,10 +320,8 @@ mutations.common <- t(mutations.common[, order(colnames(mutations.common))])
 drug_names <- rownames(target)
 ```
 
-The following step consists of creating a list of matrices, one for each
-single drug, having the *response variable y* to be predicted as the
-drug effectiveness. The mutation landscape for each cell line plays the
-role of *predictors*. For example…
+The following step consists of creating a list of matrices, one for each single drug, having the *response variable y* to be predicted as the
+drug effectiveness. The mutation landscape for each cell line plays the role of *predictors*. For example…
 
 ```r
 # Creating the matrices with the response y for the single drug
@@ -400,8 +353,7 @@ tm.list[[1]][1:10,1:5]
     ## DMS114_LUNG  0.6837069          0          0         0          0
     ## DMS273_LUNG  0.4735742          0          0         0          0
 
-The data are prepared as usual subdividing each matrix into training and
-test set.
+The data are prepared as usual subdividing each matrix into training and test set.
 
 ```r
 # Set the formula
@@ -419,11 +371,9 @@ for (i in 1:length(drug_names)) {
 }
 ```
 
-Two different model types are built and compared in terms of
-performance: a Generalized Linear Model and a Neural Network.
+Two different model types are built and compared in terms of performance: a Generalized Linear Model and a Neural Network.
 
-Let’s have a look at the GLM first. A simple cross-validation control is
-applied in order to obtain a model whose performance is realistic.
+Let’s have a look at the GLM first. A simple cross-validation control is applied in order to obtain a model whose performance is realistic.
 
 ```r
 MSE.glm_LUNG <- c()
@@ -448,14 +398,7 @@ names(MSE.glm_LUNG) <- drug_names
 names(response.glm_LUNG) <- drug_names
 ```
 
-The NN instead underwent a refinement processe. The number of hidden
-layers has always been kept to three, but the number of nodes has been
-selected after various attempts. First a simple model was chosen with a
-5-5-5 layout, giving decent results; the high number of predictors may
-have suggested the use of a more complex model, such a 15-15-15 layout:
-the prediction error increased consistently. The model proposed below
-uses a 15-10-5 cascade-like layout, averaging the best performance error
-over the whole bunch of drugs analyzed.
+The NN instead underwent a refinement processe. The number of hidden layers has always been kept to three, but the number of nodes has been selected after various attempts. First a simple model was chosen with a 5-5-5 layout, giving decent results; the high number of predictors may have suggested the use of a more complex model, such a 15-15-15 layout: the prediction error increased consistently. The model proposed below uses a 15-10-5 cascade-like layout, averaging the best performance error over the whole bunch of drugs analyzed.
 
 ```r
 MSE.nn_LUNG <- c()
@@ -485,9 +428,7 @@ names(MSE.nn_LUNG) <- drug_names
 names(response.nn_LUNG) <- drug_names
 ```
 
-Let’s compare the performance of these two different model approaches:
-the Neural Network seems to fit better the data, averaging a lower mean
-squared error.
+Let’s compare the performance of these two different model approaches: the Neural Network seems to fit better the data, averaging a lower mean squared error.
 
 ```r
 par(mfrow=c(1,2))
@@ -507,8 +448,7 @@ boxplot(MSE.nn_LUNG)
 
 ## Results
 
-It is worth comparing the performance of the models applied to the three
-selected cancer types.
+It is worth comparing the performance of the models applied to the three selected cancer types.
 
 ```r
 mean_errors <- sapply(list(MSE.glm_LUNG, MSE.nn_LUNG, MSE.glm_HLT, MSE.nn_HLT, MSE.glm_BREAST, MSE.nn_BREAST), mean)
@@ -521,10 +461,4 @@ ggplot(performance, aes(fill=model, y=mean_errors, x=tumor)) +
    geom_bar(position="dodge", stat="identity")
 ```
 
-The model performance is consistent among different cancer types: the
-neural network approach offers the lowest error. Surprisingly, Breast
-cancer data give a better performance than HLT, even though the number
-of involved cell lines is significantly lower: hence, the model is
-robust and independent from the mass of data available. This is an
-important feature, especially in cancer research, since data may be
-partly missing and/or scarce.
+The model performance is consistent among different cancer types: the neural network approach offers the lowest error. Surprisingly, Breast cancer data give a better performance than HLT, even though the number of involved cell lines is significantly lower: hence, the model is robust and independent from the mass of data available. This is an important feature, especially in cancer research, since data may be partly missing and/or scarce.
