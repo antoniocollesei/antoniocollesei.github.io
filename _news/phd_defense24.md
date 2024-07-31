@@ -1,11 +1,10 @@
 ---
 layout: post
-title: PhD Defense 2024
+title: Ph.D. defended Cum Laude in 2024
 date: 2024-05-14 12:00:00-0400
 inline: false
 related_posts: false
 ---
-
 A journey comes to an end: I successfully defended _cum laude_ my Ph.D. and celebrated with friends and family. Thanks to everyone that played a part in it.
 
 ---
