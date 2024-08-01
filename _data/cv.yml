@@ -13,7 +13,7 @@
   contents:
     - title: PhD in Bioinformatics
       institution: University of Padua, Padua, Italy
-      year: 2020 - 2023
+      year: 2020 - 2024
       description:
         - Program in Clinical and Experimental Oncology at Istituto Oncologico Veneto, IRCCS
         - Part of Vandin Lab at Department of Information Engineering
@@ -38,30 +38,29 @@
 - title: Experience
   type: time_table
   contents:
-    - title: Health Researcher
-      institution: Veneto Institute of Oncology IOV - IRCCS, Padua, Italy
+    - title: Researcher
+      institution: Veneto Institute of Oncology IOV - IRCCS, Padova, Italy
       year: 2023 - now
     - title: Doctoral Researcher
-      institution: Veneto Institute of Oncology IOV - IRCCS, Padua, Italy
+      institution: University of Padova, Italy
       year: 2020 - 2023
     - title: Biomedical Engineer
-      institution: Inventis s.r.l., Padua, Italy
+      institution: Inventis s.r.l., Padova, Italy
       year: 2018 - 2020
     - title: Research Assistant
-      institution: Medizinische Universität, Innsbruck, Austria
+      institution: Medizinische Universität Innsbruck, Austria
       year: 2017
-
 
 - title: Academic Interests
   type: nested_list
   contents:
     - title: Single-cell transcriptomics
-      items: 
+      items:
         - Unnecessary saying that this is the trend of the past few years. Let's jump in.
         - Pseudo-temporal models are cool, but they are still a bit raw in terms of mathematical explainability.
     - title: Causality
       items:
-        - <u>Correlation is not Causation:</u> my new mantra. 
+        - <u>Correlation is not Causation:</u> my new mantra.
         - I have recently developed ALLSTAR, a causally reliable tool for omics data.
         - I read "The Book of Why" by Judea Pearl.
     - title: Pharmacogenomics
