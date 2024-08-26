@@ -6,5 +6,6 @@ github_users:
 github_repos:
   - VandinLab/ALLSTAR
   - antoniocollesei/somatic-muts-pharma-response
+  - antoniocollesei/HER2-conversion-BRCAmet
   - antoniocollesei/CMVAssembler
   - antoniocollesei/nba-fairness-salary
