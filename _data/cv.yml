@@ -8,6 +8,22 @@
     - name: Languages
       value: Italian (C2), English (C1), Spanish (B1), German (A2)
 
+- title: Experience
+  type: time_table
+  contents:
+    - title: Researcher
+      institution: Veneto Institute of Oncology IOV - IRCCS, Padova, Italy
+      year: 2023 - now
+    - title: Doctoral Researcher
+      institution: University of Padova, Italy
+      year: 2020 - 2023
+    - title: Biomedical Engineer
+      institution: Inventis s.r.l., Padova, Italy
+      year: 2018 - 2020
+    - title: Research Assistant
+      institution: Medizinische Universität Innsbruck, Austria
+      year: 2017
+
 - title: Education
   type: time_table
   contents:
@@ -34,22 +50,6 @@
       description:
         - Thesis on "Mathematical Modeling of HIV Infection"
         - Curriculum in biological data analysis and elaboration
-
-- title: Experience
-  type: time_table
-  contents:
-    - title: Researcher
-      institution: Veneto Institute of Oncology IOV - IRCCS, Padova, Italy
-      year: 2023 - now
-    - title: Doctoral Researcher
-      institution: University of Padova, Italy
-      year: 2020 - 2023
-    - title: Biomedical Engineer
-      institution: Inventis s.r.l., Padova, Italy
-      year: 2018 - 2020
-    - title: Research Assistant
-      institution: Medizinische Universität Innsbruck, Austria
-      year: 2017
 
 - title: Academic Interests
   type: nested_list
